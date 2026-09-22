@@ -24,6 +24,11 @@ export function getMerchants(params: { page: number; page_size: number; status?:
   return request.get<any, ApiResponse<PageData<Merchant>>>(`${adminApiBase}/merchants`, { params })
 }
 
+// 新增商户
+export function createMerchant(data: { username: string; password: string; email?: string; phone?: string }) {
+  return request.post<any, ApiResponse<Merchant>>(`${adminApiBase}/merchants`, data)
+}
+
 // 商户详情
 export function getMerchant(id: number) {
   return request.get<any, ApiResponse<Merchant>>(`${adminApiBase}/merchants/${id}`)

@@ -1,6 +1,4 @@
 # epay-go/docker-compose.yml
-version: '3.8'
-
 services:
   # PostgreSQL 数据库
   postgres:
@@ -14,7 +12,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-epay123}
       POSTGRES_DB: ${DB_NAME:-epay}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - type: bind
+        source: ./data/postgres
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
     ports:
       - "5432:5432"
     healthcheck:
@@ -30,7 +32,11 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
     volumes:
-      - redis_data:/data
+      - type: bind
+        source: ./data/redis
+        target: /data
+        bind:
+          create_host_path: true
     ports:
       - "6379:6379"
     healthcheck:
@@ -61,6 +67,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET:-your-secret-key}
+      - MERCHANT_REGISTRATION_ENABLED=${MERCHANT_REGISTRATION_ENABLED:-false}
       - GIN_MODE=release
     ports:
       - "8080:8080"
@@ -86,11 +93,7 @@ services:
     container_name: epay-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "18181:80"
     depends_on:
       backend:
         condition: service_healthy
-
-volumes:
-  postgres_data:
-  redis_data:

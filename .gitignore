@@ -45,5 +45,8 @@ web/dist/
 # Config
 config.yaml
 
+# Local Docker bind-mounted data
+/data/
+
 # Worktrees
 .worktrees/

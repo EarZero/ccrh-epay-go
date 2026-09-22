@@ -1,0 +1,46 @@
+http://epay-ccrh.glgtjt.com {
+@merchant_register path /api/merchant/auth/register
+respond @merchant_register "merchant registration is disabled" 403
+
+@api path /api/*
+reverse_proxy @api ccrh-epay-gateway:8080 {
+header_up X-Forwarded-Proto https
+}
+
+@legacy_submit path /submit.php
+reverse_proxy @legacy_submit ccrh-epay-gateway:8080 {
+header_up X-Forwarded-Proto https
+}
+
+@legacy_mapi path /mapi.php
+reverse_proxy @legacy_mapi ccrh-epay-gateway:8080 {
+header_up X-Forwarded-Proto https
+}
+
+@legacy_api path /api.php
+reverse_proxy @legacy_api ccrh-epay-gateway:8080 {
+header_up X-Forwarded-Proto https
+}
+
+@health path /health
+reverse_proxy @health ccrh-epay-gateway:8080 {
+header_up X-Forwarded-Proto https
+}
+
+reverse_proxy ccrh-epay-frontend:80 {
+header_up X-Forwarded-Proto https
+}
+}
+
+# 预留域名：router 服务上线后取消注释并配置 upstream。
+http://router-ccrh.glgtjt.com {
+reverse_proxy ccrh-maas:3000 {
+flush_interval -1
+header_up X-Forwarded-Proto https
+}
+}
+
+# 预留域名：xiaogu 服务上线后取消注释并配置 upstream。
+# {$XIAOGU_SITE_ADDRESS} {
+#     reverse_proxy ccrh-xiaogu-gateway:8080
+# }

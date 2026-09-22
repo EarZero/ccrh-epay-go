@@ -45,6 +45,7 @@ func Setup(r *gin.Engine) {
 			adminAuth.GET("/dashboard", admin.Dashboard)
 
 			// 商户管理
+			adminAuth.POST("/merchants", admin.CreateMerchant)
 			adminAuth.GET("/merchants", admin.ListMerchants)
 			adminAuth.GET("/merchants/:id", admin.GetMerchant)
 			adminAuth.PUT("/merchants/:id", admin.UpdateMerchant)

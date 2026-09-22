@@ -35,10 +35,10 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 ### 4. 访问服务
 
-- 前端: http://localhost
+- 前端: http://localhost:18181
 - 后端 API: http://localhost:8080
-- 管理后台: http://localhost/admin/login
-- 商户中心: http://localhost/merchant/login
+- 管理后台: http://localhost:18181/admin/login
+- 商户中心: http://localhost:18181/merchant/login
 
 ## 常用命令
 

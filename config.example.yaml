@@ -20,3 +20,7 @@ redis:
 jwt:
   secret: your_jwt_secret_here_change_in_production
   expire_hour: 168  # 7 days
+
+auth:
+  # 生产环境默认关闭；商户由管理员在管理端创建
+  merchant_registration_enabled: false

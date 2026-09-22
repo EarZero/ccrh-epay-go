@@ -2,12 +2,12 @@
 package merchant
 
 import (
+	"github.com/example/epay-go/internal/config"
 	"github.com/example/epay-go/internal/service"
 	"github.com/example/epay-go/pkg/jwt"
 	"github.com/example/epay-go/pkg/response"
 	"github.com/gin-gonic/gin"
 )
-
 
 // RegisterRequest 注册请求
 type RegisterRequest struct {
@@ -19,6 +19,12 @@ type RegisterRequest struct {
 
 // Register 商户注册
 func Register(c *gin.Context) {
+	cfg := config.Get()
+	if cfg == nil || !cfg.Auth.MerchantRegistrationEnabled {
+		response.Forbidden(c, "商户公开注册已关闭")
+		return
+	}
+
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.ParamError(c, "参数错误: "+err.Error())

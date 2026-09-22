@@ -43,18 +43,21 @@ docker compose up -d --build
 
 默认端口：
 
-- `80`：前端
+- `18181`：前端
 - `8080`：后端
 - `5432`：PostgreSQL
 - `6379`：Redis
+
+本地默认访问地址：`http://localhost:18181`
 
 ### 常用访问入口
 
 部署完成后，可直接访问以下前端路径：
 
 - **管理员登录**：`/admin/login`
-- **商户注册**：`/merchant/register`
 - **商户登录**：`/merchant/login`
+
+生产环境默认关闭商户公开注册。商户账号请由管理员进入「商户管理」后点击「新增商户」创建。
 
 ## 环境变量
 
@@ -67,6 +70,7 @@ docker compose up -d --build
 - `JWT_SECRET`
 - `DEFAULT_ADMIN_USERNAME`
 - `DEFAULT_ADMIN_PASSWORD`
+- `MERCHANT_REGISTRATION_ENABLED`（生产环境保持 `false`）
 - `SITE_ADDRESS`
 - `ACME_EMAIL`
 
@@ -92,7 +96,7 @@ docker compose -f docker-compose.prod.caddy.yml up -d --build
 docker compose up -d --build
 ```
 
-然后由宿主机 Nginx 反代到容器端口，示例配置见：
+然后由宿主机 Nginx 反代到容器端口（前端 `18181`、后端 API `8080`），示例配置见：
 
 - `deploy/nginx/host.prod.conf.example`
 
@@ -155,5 +159,3 @@ NPM_REGISTRY=https://registry.npmmirror.com
 - `NPM_REGISTRY`：加速前端 npm 依赖下载，前端镜像默认已使用该阿里云镜像。
 
 > 注意：`web/package-lock.json` 里的依赖下载地址（`resolved`）会被写死，若该文件在配了内网镜像（如腾讯云内网 `mirrors.tencentyun.com`）的机器上重新生成，会导致其他环境 `npm ci` 因地址不可达而失败。重新生成锁文件时请确保使用公网可达的镜像。
-
-

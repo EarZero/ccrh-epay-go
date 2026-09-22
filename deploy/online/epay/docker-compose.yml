@@ -1,0 +1,122 @@
+services:
+  ccrh-epay-postgres:
+    image: postgres:16-alpine
+    container_name: ccrh-epay-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-epay}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      POSTGRES_DB: ${DB_NAME:-epay}
+    volumes:
+      - type: bind
+        source: ./data/postgres
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
+    networks:
+      - ccrh-epay-private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-epay}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  ccrh-epay-redis:
+    image: redis:7-alpine
+    container_name: ccrh-epay-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
+    volumes:
+      - type: bind
+        source: ./data/redis
+        target: /data
+        bind:
+          create_host_path: true
+    networks:
+      - ccrh-epay-private
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  ccrh-epay-gateway:
+    image: ${BACKEND_IMAGE:-ai-city-cn-shanghai.cr.volces.com/ccrh/ccrh-epay-gateway:20260922-registration-closed-backend}
+    container_name: ccrh-epay-gateway
+    restart: unless-stopped
+    environment:
+      DB_HOST: ccrh-epay-postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-epay}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      DB_NAME: ${DB_NAME:-epay}
+      DB_SSLMODE: disable
+      REDIS_HOST: ccrh-epay-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-epay_admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:?DEFAULT_ADMIN_PASSWORD must be set in .env}
+      MERCHANT_REGISTRATION_ENABLED: ${MERCHANT_REGISTRATION_ENABLED:-false}
+      GIN_MODE: release
+    expose:
+      - "8080"
+    networks:
+      ccrh-edge:
+      ccrh-epay-private:
+        aliases:
+          - backend
+    depends_on:
+      ccrh-epay-postgres:
+        condition: service_healthy
+      ccrh-epay-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  ccrh-epay-frontend:
+    image: ${FRONTEND_IMAGE:-ai-city-cn-shanghai.cr.volces.com/ccrh/ccrh-epay-gateway:20260922-registration-closed-frontend}
+    container_name: ccrh-epay-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - ccrh-edge
+      - ccrh-epay-private
+    depends_on:
+      ccrh-epay-gateway:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  ccrh-edge:
+    name: ccrh-edge
+    external: true
+  ccrh-epay-private:
+    name: ccrh-epay-private
+    internal: true

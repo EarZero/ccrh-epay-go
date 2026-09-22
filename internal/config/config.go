@@ -10,6 +10,7 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	Redis    RedisConfig    `mapstructure:"redis"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
+	Auth     AuthConfig     `mapstructure:"auth"`
 }
 
 type ServerConfig struct {
@@ -38,6 +39,10 @@ type JWTConfig struct {
 	ExpireHour int    `mapstructure:"expire_hour"`
 }
 
+type AuthConfig struct {
+	MerchantRegistrationEnabled bool `mapstructure:"merchant_registration_enabled"`
+}
+
 var Cfg *Config
 
 func Load(path string) error {
@@ -58,6 +63,7 @@ func Load(path string) error {
 	viper.BindEnv("redis.password", "REDIS_PASSWORD")
 	viper.BindEnv("jwt.secret", "JWT_SECRET")
 	viper.BindEnv("server.mode", "GIN_MODE")
+	viper.BindEnv("auth.merchant_registration_enabled", "MERCHANT_REGISTRATION_ENABLED")
 
 	if err := viper.ReadInConfig(); err != nil {
 		return err

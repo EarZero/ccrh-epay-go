@@ -77,12 +77,6 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '商户登录' },
   },
   {
-    path: '/merchant/register',
-    name: 'MerchantRegister',
-    component: () => import('@/views/merchant/Register.vue'),
-    meta: { title: '商户注册' },
-  },
-  {
     path: '/merchant',
     component: () => import('@/layouts/MerchantLayout.vue'),
     meta: { requiresAuth: true, authType: 'merchant' },

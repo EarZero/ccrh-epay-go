@@ -10,7 +10,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-epay123}
       POSTGRES_DB: ${DB_NAME:-epay}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - type: bind
+        source: ./data/postgres
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-epay}"]
       interval: 10s
@@ -30,7 +34,11 @@ services:
       - .env
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
     volumes:
-      - redis_data:/data
+      - type: bind
+        source: ./data/redis
+        target: /data
+        bind:
+          create_host_path: true
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ${REDIS_PASSWORD:+-a $REDIS_PASSWORD} ping | grep PONG"]
       interval: 10s
@@ -63,6 +71,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - JWT_SECRET=${JWT_SECRET:-your-secret-key}
+      - MERCHANT_REGISTRATION_ENABLED=${MERCHANT_REGISTRATION_ENABLED:-false}
       - GIN_MODE=release
     depends_on:
       postgres:
@@ -112,8 +121,16 @@ services:
       - ACME_EMAIL=${ACME_EMAIL:-}
     volumes:
       - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      - type: bind
+        source: ./data/caddy
+        target: /data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./data/caddy-config
+        target: /config
+        bind:
+          create_host_path: true
     ports:
       - "80:80"
       - "443:443"
@@ -122,9 +139,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  caddy_data:
-  caddy_config:
-  postgres_data:
-  redis_data:

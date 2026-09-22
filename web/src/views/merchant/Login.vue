@@ -15,9 +15,6 @@
             登录
           </a-button>
         </a-form-item>
-        <div class="register-link">
-          还没有账号？<router-link to="/merchant/register">立即注册</router-link>
-        </div>
       </a-form>
     </div>
   </div>
@@ -74,13 +71,5 @@ const handleSubmit = async () => {
   text-align: center;
   margin-bottom: 32px;
   color: #1d2129;
-}
-.register-link {
-  text-align: center;
-  margin-top: 16px;
-  color: #86909c;
-}
-.register-link a {
-  color: #165dff;
 }
 </style>

@@ -9,6 +9,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateMerchant 由管理员创建商户
+func CreateMerchant(c *gin.Context) {
+	var req service.RegisterRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.ParamError(c, "参数错误: "+err.Error())
+		return
+	}
+
+	merchantService := service.NewMerchantService()
+	merchant, err := merchantService.CreateByAdmin(&req)
+	if err != nil {
+		response.Error(c, response.CodeParamError, err.Error())
+		return
+	}
+
+	response.Success(c, merchant)
+}
+
 // ListMerchants 商户列表
 func ListMerchants(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))

@@ -31,6 +31,16 @@ type RegisterRequest struct {
 
 // Register 商户注册
 func (s *MerchantService) Register(req *RegisterRequest) (*model.Merchant, error) {
+	return s.create(req)
+}
+
+// CreateByAdmin 由管理员创建商户。
+// 管理员创建与公开注册共用同一套用户名、密码和密钥生成规则，避免产生两套商户初始化逻辑。
+func (s *MerchantService) CreateByAdmin(req *RegisterRequest) (*model.Merchant, error) {
+	return s.create(req)
+}
+
+func (s *MerchantService) create(req *RegisterRequest) (*model.Merchant, error) {
 	// 检查用户名是否存在
 	exists, err := s.repo.ExistsByUsername(req.Username)
 	if err != nil {
